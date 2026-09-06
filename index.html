@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DeskFlow · Institutional Execution Clerk for Binance Agent OS</title>
   <meta name="description" content="Deterministic execution clerk for Binance Agent OS. Mandate governed, subaccount scoped, dual venue pricing across Spot and Convert with explicit authorization gates.">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -76,6 +79,11 @@
     }
     .brand {
       display: flex; align-items: center; gap: 12px;
+    }
+    .brand_logo {
+      width: 36px; height: 36px; border-radius: 9px;
+      box-shadow: 0 0 20px rgba(240, 185, 11, 0.45);
+      display: block; object-fit: cover;
     }
     .brand_emblem {
       width: 34px; height: 34px; border-radius: 10px;
@@ -465,7 +473,7 @@
   <nav>
     <div class="container nav_wrap">
       <div class="brand">
-        <div class="brand_emblem">D</div>
+        <img src="logo.png" alt="DeskFlow" class="brand_logo">
         <div class="brand_title">DeskFlow</div>
         <span class="brand_badge">Binance Agent OS</span>
       </div>
@@ -898,7 +906,8 @@ deskflow test
   <!-- Footer -->
   <footer>
     <div class="container footer_inner">
-      <div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="logo.png" alt="DeskFlow" style="width: 24px; height: 24px; border-radius: 6px;">
         <span style="font-weight: 700; color: #fff;">DESKFLOW</span> &nbsp;·&nbsp;
         <span>Autonomous Execution Clerk for Binance Agent OS</span>
       </div>

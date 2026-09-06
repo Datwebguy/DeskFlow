@@ -1,5 +1,9 @@
 # DeskFlow Execution Clerk
 
+<p align="center">
+  <img src="logo.png" width="96" height="96" alt="DeskFlow Logo" />
+</p>
+
 `#F0B90B` **Binance Agent OS Native** &nbsp; | &nbsp; `#0ECB81` **Mandate Governed** &nbsp; | &nbsp; `#F6465D` **Subaccount Isolated** &nbsp; | &nbsp; `#1E2329` **Model Context Protocol**
 
 Live Interactive Terminal: https://datwebguy.github.io/DeskFlow/
