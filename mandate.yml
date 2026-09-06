@@ -1,0 +1,12 @@
+product: DeskFlow
+account: agentic-sub
+max_notional_usd: 10
+venues_allow:
+  - convert
+  - spot
+venues_deny:
+  - futures
+  - margin
+confirm: required
+withdraw: deny
+main_account_write: deny

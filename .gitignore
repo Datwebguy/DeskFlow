@@ -1,0 +1,22 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and secrets
+.env
+*.local
+
+# Internal planning and prompt documents
+hackathon.md
+memory.md
+prj.md
+product.md
+handover.md
+resources.md
+AGENT_PROMPT.md
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
