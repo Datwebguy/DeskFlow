@@ -756,6 +756,7 @@
             <button class="quick_chip" onclick="applyPreset('Buy 3 USD SOLANA. Cash only.')">Buy 3 USD SOLANA</button>
             <button class="quick_chip" onclick="applyPreset('Buy 50 USD SOL. Cash only.')">Buy 50 USD SOL (Test $50 Cap)</button>
             <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB</button>
+            <button class="quick_chip" onclick="applyPreset('Sell 5 USD BNB. Cash only.')">Sell 5 USD BNB</button>
             <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC</button>
             <button class="quick_chip" onclick="applyPreset('Buy 5 USD SOL 20x perps')">Buy 5 USD SOL 20x (Denied Leverage)</button>
           </div>
@@ -1076,16 +1077,61 @@ deskflow test
         return;
       }
 
-      const sizeMatch = lower.match(/(?:\$|\b)(\d+(?:\.\d+)?)\s*(?:usd|usdt|dollars?|\$|\b)/) || lower.match(/(\d+(?:\.\d+)?)\s*(?:usd|usdt|\$)/);
-      if (!sizeMatch) {
+      const asset = extractAsset(input);
+      if (!asset) {
         appendAgentMessage(
-          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Notional Size</span><br>' +
-          'Violation: Specify dynamic order amount (e.g. 3 USD or 50 USDT).'
+          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Target Asset</span><br>' +
+          'Violation: Specify target coin name (e.g. SOLANA, BTC, ETH, BNB, DOGE).'
         );
         return;
       }
 
-      const notional = parseFloat(sizeMatch[1]);
+      const symbol = asset + 'USDT';
+      let mid = 100.0;
+      let ask = 100.01;
+      let bid = 100.00;
+
+      try {
+        const r = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=' + symbol);
+        if (r.ok) {
+          const d = await r.json();
+          bid = parseFloat(d.bidPrice);
+          ask = parseFloat(d.askPrice);
+          mid = (bid + ask) / 2.0;
+        } else {
+          appendAgentMessage(
+            '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Unknown Trading Pair</span><br>' +
+            'Violation: Trading pair ' + symbol + ' is not listed on Binance liquidity rails.'
+          );
+          return;
+        }
+      } catch (err) {
+        if (asset === 'SOL') { mid = 104.095; ask = 104.10; bid = 104.09; }
+        else if (asset === 'BNB') { mid = liveBook.mid; ask = liveBook.ask; bid = liveBook.bid; }
+        else if (asset === 'BTC') { mid = 87420.50; ask = 87421.00; bid = 87420.00; }
+        else if (asset === 'ETH') { mid = 2410.55; ask = 2410.60; bid = 2410.50; }
+      }
+
+      let notional = 0;
+      let specifiedQty = null;
+
+      const usdMatch = lower.match(/\$(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:usd|usdt|dollars?)/);
+      if (usdMatch) {
+        notional = parseFloat(usdMatch[1] || usdMatch[2]);
+      } else {
+        const qtyMatch = lower.match(/(?:buy|sell)\s+(\d+(?:\.\d+)?)/) || lower.match(new RegExp('(\\d+(?:\\.\\d+)?)\\s*' + asset.toLowerCase()));
+        if (qtyMatch) {
+          specifiedQty = parseFloat(qtyMatch[1]);
+          notional = parseFloat((specifiedQty * mid).toFixed(2));
+        } else {
+          appendAgentMessage(
+            '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Amount</span><br>' +
+            'Violation: Specify dynamic order amount (e.g. 5 USD or 0.005 ' + asset + ').'
+          );
+          return;
+        }
+      }
+
       if (notional <= 0) {
         appendAgentMessage(
           '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Invalid Size</span><br>' +
@@ -1103,43 +1149,10 @@ deskflow test
         return;
       }
 
-      const asset = extractAsset(input);
-      if (!asset) {
-        appendAgentMessage(
-          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Target Asset</span><br>' +
-          'Violation: Specify target coin name (e.g. SOLANA, BTC, ETH, BNB, DOGE).'
-        );
-        return;
-      }
-
-      const symbol = asset + 'USDT';
-      let mid = 100.0;
-      let ask = 100.01;
-
-      try {
-        const r = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=' + symbol);
-        if (r.ok) {
-          const d = await r.json();
-          const b = parseFloat(d.bidPrice);
-          const a = parseFloat(d.askPrice);
-          mid = (b + a) / 2.0;
-          ask = a;
-        } else {
-          appendAgentMessage(
-            '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Unknown Trading Pair</span><br>' +
-            'Violation: Trading pair ' + symbol + ' is not listed on Binance liquidity rails.'
-          );
-          return;
-        }
-      } catch (err) {
-        if (asset === 'SOL') { mid = 104.095; ask = 104.10; }
-        else if (asset === 'BNB') { mid = liveBook.mid; ask = liveBook.ask; }
-        else if (asset === 'BTC') { mid = 87420.50; ask = 87421.00; }
-        else if (asset === 'ETH') { mid = 2410.55; ask = 2410.60; }
-      }
-
+      const touchPrice = isBuy ? ask : bid;
+      const touchLabel = isBuy ? 'Spot Touch Ask' : 'Spot Touch Bid';
       const poId = 'PO_' + String(orderSequence).padStart(3, '0');
-      const estQty = (notional / ask).toFixed(8);
+      const estQty = specifiedQty ? specifiedQty.toFixed(8) : (notional / touchPrice).toFixed(8);
       const estFee = (notional * 0.001).toFixed(4);
 
       pendingTicket = {
@@ -1149,7 +1162,7 @@ deskflow test
         symbol,
         notional,
         mid,
-        ask,
+        execPrice: touchPrice,
         estQty,
         estFee,
         venue: 'SPOT'
@@ -1160,11 +1173,12 @@ deskflow test
         I have evaluated your order against the mandate and queried live Binance depth.
         <div class="ticket_card">
           <div class="ticket_row"><span class="ticket_label">Parent Order ID</span><span class="ticket_val" style="color: var(--gold);">${poId}</span></div>
+          <div class="ticket_row"><span class="ticket_label">Action &amp; Side</span><span class="ticket_val" style="color: ${isBuy ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">${isBuy ? 'BUY' : 'SELL'} ${asset}</span></div>
           <div class="ticket_row"><span class="ticket_label">Instrument</span><span class="ticket_val">${symbol}</span></div>
           <div class="ticket_row"><span class="ticket_label">Planned Capital</span><span class="ticket_val">$${notional.toFixed(2)} USD</span></div>
           <div class="ticket_row"><span class="ticket_label">Decision Mid</span><span class="ticket_val">${mid.toFixed(4)} USDT</span></div>
-          <div class="ticket_row"><span class="ticket_label">Spot Touch Ask</span><span class="ticket_val">${ask.toFixed(4)} USDT</span></div>
-          <div class="ticket_row"><span class="ticket_label">Estimated Fill</span><span class="ticket_val">${estQty} ${asset}</span></div>
+          <div class="ticket_row"><span class="ticket_label">${touchLabel}</span><span class="ticket_val">${touchPrice.toFixed(4)} USDT</span></div>
+          <div class="ticket_row"><span class="ticket_label">${isBuy ? 'Estimated Buy Qty' : 'Estimated Sell Qty'}</span><span class="ticket_val">${estQty} ${asset}</span></div>
           <div class="ticket_row"><span class="ticket_label">Venue Selected</span><span class="ticket_val" style="color: var(--gold);">SPOT (Immediate liquidity)</span></div>
           <div class="ticket_row"><span class="ticket_label">Convert Quote</span><span class="ticket_val">QUOTE ON CONFIRM</span></div>
           <div class="ticket_row"><span class="ticket_label">Isolated Fee</span><span class="ticket_val">${estFee} USDT</span></div>
@@ -1185,14 +1199,17 @@ deskflow test
 
       appendUserMessage('CONFIRM ' + t.poId);
 
-      const execPrice = t.ask;
+      const execPrice = t.execPrice || t.ask;
       const mid = t.mid;
-      const shortfallBps = (((execPrice - mid) / mid) * 10000).toFixed(2);
+      const shortfallBps = (t.side === 'BUY'
+        ? (((execPrice - mid) / mid) * 10000)
+        : (((mid - execPrice) / mid) * 10000)
+      ).toFixed(2);
       const shortfallStr = (parseFloat(shortfallBps) >= 0 ? '+' : '') + shortfallBps + ' bps';
 
       const receiptHtml = `
         <span style="color: var(--green); font-weight: 700;">[EXECUTION COMMITTED TO BLOTTER]</span><br>
-        Authorization verified: CONFIRM ${t.poId}. Order executed on venue ${t.venue} at ${execPrice.toFixed(4)} USDT.
+        Authorization verified: CONFIRM ${t.poId}. Order executed on venue ${t.venue} (${t.side}) at ${execPrice.toFixed(4)} USDT.
         <div class="receipt_display">
           <div class="rc_head">
             <span class="rc_title">DESKFLOW EXECUTION RECEIPT · BINANCE AGENT OS</span>
@@ -1200,7 +1217,7 @@ deskflow test
           </div>
           <div class="rc_grid">
             <div class="rc_cell"><span>Parent Order ID</span><b>${t.poId}</b></div>
-            <div class="rc_cell"><span>Executed Venue</span><b>${t.venue}</b></div>
+            <div class="rc_cell"><span>Executed Venue</span><b>${t.venue} · ${t.side}</b></div>
             <div class="rc_cell"><span>Symbol</span><b>${t.symbol}</b></div>
             <div class="rc_cell"><span>Planned Capital</span><b>$${t.notional.toFixed(2)} USD</b></div>
             <div class="rc_cell"><span>Filled Quantity</span><b>${t.estQty} ${t.asset}</b></div>

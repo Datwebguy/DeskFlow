@@ -146,19 +146,36 @@ def parse_order(raw_text, custom_cap=None):
     else:
         return {"valid": False, "code": "REJECT DATA", "reason": "Missing buy or sell action in order prompt"}
 
-    # Extract size dynamically (no hardcoded fallback)
-    size_match = re.search(r"(?:\$|\b)(\d+(?:\.\d+)?)\s*(?:usd|usdt|dollars?|\$|\b)", text)
-    if not size_match:
-        size_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:usd|usdt|\$)", text)
-
-    if not size_match:
+    # Extract target asset dynamically across Binance universe
+    asset = extract_asset(text)
+    if not asset:
         return {
             "valid": False,
             "code": "REJECT DATA",
-            "reason": "Missing order notional amount (e.g. 5 USD or 8 USDT)"
+            "reason": "Missing target asset in order prompt (e.g. SOL, BTC, ETH, BNB)"
         }
 
-    notional = float(size_match.group(1))
+    # Extract size dynamically - supports both USD notional ($5, 5 USD) and coin quantity (0.005 BNB)
+    specified_qty = None
+    usd_match = re.search(r"\$(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:usd|usdt|dollars?)", text)
+    if usd_match:
+        notional = float(usd_match.group(1) or usd_match.group(2))
+    else:
+        # Check for asset quantity (e.g. '0.005 bnb' or 'sell 0.005 bnb')
+        qty_match = re.search(r"(?:buy|sell)\s+(\d+(?:\.\d+)?)\s*(?:[a-z]+)?", text)
+        if not qty_match:
+            qty_match = re.search(r"(\d+(?:\.\d+)?)\s*" + asset.lower(), text)
+        if qty_match:
+            specified_qty = float(qty_match.group(1))
+            ticker = get_live_ticker(f"{asset}USDT")
+            notional = round(specified_qty * ticker["mid"], 2)
+        else:
+            return {
+                "valid": False,
+                "code": "REJECT DATA",
+                "reason": "Missing order amount (e.g. 5 USD or 0.005 BNB)"
+            }
+
     if notional <= 0:
         return {"valid": False, "code": "REJECT DATA", "reason": "Order notional amount must be greater than zero"}
 
@@ -170,20 +187,12 @@ def parse_order(raw_text, custom_cap=None):
             "reason": f"Order size ${notional:.2f} exceeds configured mandate cap ${active_mandate['max_notional_usd']:.2f}"
         }
 
-    # Extract target asset dynamically across Binance universe
-    asset = extract_asset(text)
-    if not asset:
-        return {
-            "valid": False,
-            "code": "REJECT DATA",
-            "reason": "Missing target asset in order prompt (e.g. SOL, BTC, ETH, BNB)"
-        }
-
     return {
         "valid": True,
         "side": side,
         "asset": asset,
-        "notional_usd": notional
+        "notional_usd": notional,
+        "specified_qty": specified_qty
     }
 
 
@@ -199,8 +208,13 @@ def price_parent_order(order_text, custom_cap=None):
     ORDER_COUNTER += 1
 
     touch_price = ticker["ask"] if parsed["side"] == "BUY" else ticker["bid"]
-    est_qty = round(parsed["notional_usd"] / touch_price, 8)
-    est_fee = round(parsed["notional_usd"] * 0.001, 4)
+    if parsed.get("specified_qty"):
+        est_qty = parsed["specified_qty"]
+        notional_calc = round(est_qty * touch_price, 2)
+    else:
+        est_qty = round(parsed["notional_usd"] / touch_price, 8)
+        notional_calc = parsed["notional_usd"]
+    est_fee = round(notional_calc * 0.001, 4)
 
     order_record = {
         "po_id": po_id,
@@ -209,7 +223,8 @@ def price_parent_order(order_text, custom_cap=None):
         "side": parsed["side"],
         "asset": parsed["asset"],
         "symbol": symbol,
-        "notional_usd": parsed["notional_usd"],
+        "notional_usd": notional_calc,
+        "specified_qty": parsed.get("specified_qty"),
         "decision_mid": ticker["mid"],
         "touch_price": touch_price,
         "bid": ticker["bid"],
@@ -243,8 +258,12 @@ def execute_confirmed_order(po_id, confirm_token):
 
     exec_price = order["touch_price"]
     mid = order["decision_mid"]
-    notional = order["notional_usd"]
-    filled_qty = round(notional / exec_price, 8)
+    if order.get("specified_qty"):
+        filled_qty = order["specified_qty"]
+        notional = round(filled_qty * exec_price, 2)
+    else:
+        notional = order["notional_usd"]
+        filled_qty = round(notional / exec_price, 8)
     fee = round(notional * 0.001, 4)
 
     if order["side"] == "BUY":
@@ -297,7 +316,7 @@ def format_receipt_card(receipt):
 │  DESKFLOW EXECUTION RECEIPT · BINANCE AGENT OS                   │
 ├──────────────────────────────────────────────────────────────────┤
 │  Parent Order ID : {receipt['po_id']:<21} Status   : {receipt['status']:<14} │
-│  Venue Executed  : {receipt['venue']:<21} Symbol   : {receipt['symbol']:<14} │
+│  Venue Executed  : {receipt['venue'] + ' · ' + receipt['side']:<21} Symbol   : {receipt['symbol']:<14} │
 │  Planned Capital : ${receipt['planned_usd']:<20.2f} Filled   : {receipt['filled_qty']:.8f} {receipt['asset']} │
 ├──────────────────────────────────────────────────────────────────┤
 │  Decision Mid    : {receipt['decision_mid']:<18.4f} USDT Fill Price: {receipt['exec_price']:.4f} USDT │
@@ -360,6 +379,24 @@ def run_test_suite():
         print(f"FAIL -> Confirmation failed: {res.get('error')}")
         return False
 
+    # Test 5: Dynamic Sell Order Execution (Reversal / Take Profit)
+    sell_prompt = "Sell 5 USD BNB. Cash only."
+    print(f"\n[STEP 5] Testing Dynamic Sell Order: '{sell_prompt}'")
+    priced_sell = price_parent_order(sell_prompt)
+    if priced_sell.get("valid") and priced_sell["side"] == "SELL":
+        print(f"PASS -> Sell mandate passed | Side: {priced_sell['side']} | Asset: {priced_sell['asset']}")
+        print(f"        Decision Mid: {priced_sell['decision_mid']:.4f} USDT | Touch Bid: {priced_sell['touch_price']:.4f} USDT")
+        res_sell = execute_confirmed_order(priced_sell["po_id"], priced_sell["required_token"])
+        if res_sell["success"]:
+            print(f"PASS -> Sell execution filled cleanly on venue {res_sell['receipt']['venue']}")
+            print(format_receipt_card(res_sell["receipt"]))
+        else:
+            print(f"FAIL -> Sell execution failed: {res_sell.get('error')}")
+            return False
+    else:
+        print(f"FAIL -> Sell pricing failed: {priced_sell}")
+        return False
+
     print("=" * 66)
     print(" ALL VERIFICATION CHECKS PASSED (100% OPERATIONAL)")
     print("=" * 66)
@@ -380,8 +417,9 @@ def run_cli_order(order_text, custom_cap=None):
     print(f"Side            : {priced['side']}")
     print(f"Asset           : {priced['asset']}")
     print(f"Notional USD    : ${priced['notional_usd']:.2f}")
+    touch_label = "Spot Touch Ask" if priced['side'] == 'BUY' else "Spot Touch Bid"
     print(f"Decision Mid    : {priced['decision_mid']:.4f} USDT")
-    print(f"Spot Touch Ask  : {priced['touch_price']:.4f} USDT")
+    print(f"{touch_label:<16}: {priced['touch_price']:.4f} USDT")
     print(f"Estimated Qty   : {priced['est_qty']:.8f} {priced['asset']}")
     print(f"Convert Quote   : {priced['convert_quote']}")
     print(f"Selected Venue  : {priced['recommended_venue']}")
