@@ -39,14 +39,17 @@ deskflow test
 
 ### Path Three · AI Agent Integration (Claude Code and Cursor)
 
-Attach DeskFlow as a Model Context Protocol tool provider:
+Any user can attach DeskFlow globally from any terminal folder without navigating into project directories:
 
 ```bash
-# Step 1: Connect official Binance Agent OS gateway
-claude mcp add binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
+# Step 1: Install DeskFlow globally via pip
+pip install git+https://github.com/Datwebguy/DeskFlow.git
 
-# Step 2: Attach DeskFlow execution clerk
-claude mcp add deskflow -- python deskflow.py mcp
+# Step 2: Connect official Binance Agent OS gateway
+claude mcp add --scope user binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
+
+# Step 3: Attach DeskFlow execution clerk globally
+claude mcp add --scope user deskflow -- deskflow mcp
 ```
 
 Once attached, prompt your agent naturally: `"Buy 5 USD BNB. Cash only."` DeskFlow will intercept, price against live depth, issue ticket `PO_001`, and refuse execution until you reply: `CONFIRM PO_001`.
