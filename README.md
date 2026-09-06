@@ -1,6 +1,6 @@
 # DeskFlow Execution Clerk
 
-`#F0B90B` **Binance Agent OS Track A** &nbsp; | &nbsp; `#0ECB81` **Mandate Governed** &nbsp; | &nbsp; `#F6465D` **Subaccount Isolated** &nbsp; | &nbsp; `#1E2329` **Model Context Protocol**
+`#F0B90B` **Binance Agent OS Native** &nbsp; | &nbsp; `#0ECB81` **Mandate Governed** &nbsp; | &nbsp; `#F6465D` **Subaccount Isolated** &nbsp; | &nbsp; `#1E2329` **Model Context Protocol**
 
 Live Interactive Terminal: https://datwebguy.github.io/DeskFlow/
 
@@ -92,3 +92,32 @@ In the positive validation scenario, a cash parent order for eight United States
 Deployment requires adding the official Binance Model Context Protocol server inside your client environment. The server connects using streamable transport to the official agentic gateway.
 
 Authentication takes place through secure authorization, binding the session directly to your dedicated subaccount. Once authenticated, DeskFlow reads the mandate file, connects to the exposed tool registry, and stands ready to govern your autonomous execution flow.
+
+## Operational Execution
+
+DeskFlow functions both as an autonomous terminal command and as an installable Model Context Protocol server.
+
+### Command Execution
+
+Operators can dispatch natural language parent orders directly from the terminal. The clerk evaluates the mandate, pulls live exchange depth, issues the pretrade ticket, and awaits confirmation.
+
+```bash
+python deskflow.py "Buy 8 USD BNB. Cash only."
+```
+
+### Automated Verification Suite
+
+To verify mandate enforcement, venue arbitrage, live telemetry pulls, fee isolation, and execution receipt card formatting in one command:
+
+```bash
+python deskflow.py test
+```
+
+### Model Context Protocol Server
+
+DeskFlow exposes native tool endpoints over standard input and output. Any compatible agent client can attach DeskFlow as a local tool provider:
+
+```bash
+python deskflow.py mcp
+```
+
