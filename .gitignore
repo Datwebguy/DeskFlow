@@ -22,3 +22,6 @@ AGENT_PROMPT.md
 *.swp
 __pycache__/
 *.pyc
+*.egg-info/
+build/
+dist/

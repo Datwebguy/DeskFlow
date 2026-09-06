@@ -511,8 +511,8 @@
           <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
             Run DeskFlow locally with zero external libraries. Run the automated test suite to verify mandate intercepts and receipt rendering, or execute a custom order prompt directly in your shell.
           </p>
-          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text-soft);">
-            python deskflow.py test
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft);">
+            cd DeskFlow && python deskflow.py test
           </div>
         </div>
 
@@ -672,16 +672,20 @@ DeskFlow: Commits execution, isolates fee, and returns glowing receipt card.</pr
         </div>
 
         <div class="tab_pane">
-          <pre><span style="color: var(--text-muted);"># Execute dynamic parent order from command line</span>
-python deskflow.py "Buy 6.50 USD BNB. Cash only."
+          <pre><span style="color: var(--text-muted);"># Step 1: Clone and navigate to DeskFlow directory</span>
+git clone https://github.com/Datwebguy/DeskFlow.git
+cd DeskFlow
 
-<span style="color: var(--text-muted);"># Clerk parses amount, evaluates bookTicker, and asks for authorization</span>
+<span style="color: var(--text-muted);"># Step 2: Execute dynamic order prompt</span>
+python deskflow.py "Buy 3 USD SOLANA. Cash only."
+
+<span style="color: var(--text-muted);"># Clerk evaluates live Binance bookTicker and asks for authorization</span>
 [MANDATE CHECK PASSED]
 Parent Order ID : PO_001
 Side            : BUY
-Asset           : BNB
-Notional USD    : $6.50
-Decision Mid    : 765.5450 USDT
+Asset           : SOL
+Notional USD    : $3.00
+Decision Mid    : 104.0950 USDT
 Selected Venue  : SPOT
 AWAITING APPROVAL: Type 'CONFIRM PO_001' to commit.</pre>
         </div>

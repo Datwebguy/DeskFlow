@@ -16,14 +16,25 @@ Click any preset chip or type an order prompt like `"Buy 5 USD BNB. Cash only."`
 
 ### Path Two · Local Machine Execution
 
-Clone the repository and run directly with Python. No external dependencies required:
+Clone the repository, enter the directory, and run directly with Python:
 
 ```bash
+# Clone and enter directory
+git clone https://github.com/Datwebguy/DeskFlow.git
+cd DeskFlow
+
 # Run automated verification suite
 python deskflow.py test
 
 # Execute dynamic order
-python deskflow.py "Buy 5 USD BNB. Cash only."
+python deskflow.py "Buy 3 USD SOLANA. Cash only."
+```
+
+Alternatively install globally to run from any terminal directory:
+
+```bash
+pip install git+https://github.com/Datwebguy/DeskFlow.git
+deskflow test
 ```
 
 ### Path Three · AI Agent Integration (Claude Code and Cursor)
