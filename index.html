@@ -277,6 +277,15 @@
     }
     .terminal_content { padding: 28px; }
     .quick_chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .cap_choice {
+      font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+      padding: 5px 12px; border-radius: 6px;
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .cap_choice.active, .cap_choice:hover {
+      border-color: var(--gold); color: var(--gold); background: rgba(240, 185, 11, 0.1);
+    }
     .quick_chip {
       font-family: var(--mono); font-size: 12px; padding: 7px 14px;
       background: var(--surface-elevated); border: 1px solid var(--border);
@@ -613,12 +622,24 @@
             <span>Live Binance REST Active</span>
           </div>
         </div>
-        <div class="terminal_content">
+                <div class="terminal_content">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding: 14px 18px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 8px;">
+            <span style="font-family: var(--mono); font-size: 12px; color: var(--text-soft); font-weight: 600;">
+              Mandate Capital Ceiling: <b id="cap_display" style="color: var(--gold);">$10.00 USD</b>
+            </span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="cap_choice active" onclick="setCeiling(10, this)">$10 Default</button>
+              <button class="cap_choice" onclick="setCeiling(50, this)">$50 Cap</button>
+              <button class="cap_choice" onclick="setCeiling(100, this)">$100 Cap</button>
+              <button class="cap_choice" onclick="setCeiling(500, this)">$500 Cap</button>
+            </div>
+          </div>
+
           <div class="quick_chips">
             <button class="quick_chip" onclick="applyPreset('Buy 3 USD SOLANA. Cash only.')">Buy 3 USD SOLANA (Solana)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 50 USD SOL. Cash only.')">Buy 50 USD SOL (Test $50 Cap)</button>
             <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB (BNB)</button>
             <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC (Bitcoin)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 25 USD SOL. Cash only.')">Buy 25 USD SOL (Exceeds Cap)</button>
             <button class="quick_chip" onclick="applyPreset('Buy 5 USD SOL 20x perps')">Buy 5 USD SOL 20x (Denied Leverage)</button>
           </div>
 
@@ -855,6 +876,15 @@ python deskflow.py test
     }
 
     // Interactive Console Logic (Dynamic, Zero Mock)
+    let currentCeiling = 10.00;
+
+    function setCeiling(amount, btn) {
+      currentCeiling = parseFloat(amount);
+      document.getElementById('cap_display').innerText = '$' + currentCeiling.toFixed(2) + ' USD';
+      document.querySelectorAll('.cap_choice').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      executePrompt();
+    }
     let activeTicket = null;
     let orderNum = 1;
 
@@ -913,10 +943,10 @@ python deskflow.py test
         return;
       }
 
-      if (notional > 10.00) {
+      if (notional > currentCeiling) {
         display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT SIZE] Mandate Cap Exceeded</span>\n' +
-          'Violation: Order amount $' + notional.toFixed(2) + ' exceeds maximum permitted mandate cap of $10.00.\n' +
-          'Clerk Action: Trade blocked. Reduce size within governing boundary.';
+          'Violation: Order amount $' + notional.toFixed(2) + ' exceeds configured mandate cap of $' + currentCeiling.toFixed(2) + '.\n' +
+          'Clerk Action: Trade blocked. Switch to a higher mandate ceiling above or reduce order size.';
         return;
       }
 
@@ -977,7 +1007,7 @@ python deskflow.py test
       display.innerHTML = '<span style="color: var(--green); font-weight: 700;">[MANDATE PASSED · PRETRADE TICKET GENERATED]</span>\n' +
         'Parent Order ID : <span style="color: var(--gold); font-weight: 700;">' + poId + '</span>\n' +
         'Instrument      : ' + symbol + '\n' +
-        'Planned Capital : $' + notional.toFixed(2) + ' USD\n' +
+        'Planned Capital : $' + notional.toFixed(2) + ' USD (Within $' + currentCeiling.toFixed(2) + ' cap)\n' +
         'Decision Mid    : ' + mid.toFixed(4) + ' USDT\n' +
         'Spot Touch Ask  : ' + ask.toFixed(4) + ' USDT\n' +
         'Estimated Qty   : ' + estQty + ' ' + asset + '\n' +

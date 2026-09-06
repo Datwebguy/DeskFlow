@@ -91,7 +91,34 @@ def get_live_ticker(symbol="BNBUSDT"):
         return {"bid": fb["bid"], "ask": fb["ask"], "mid": fb["mid"], "symbol": symbol, "live": False}
 
 
-def parse_order(raw_text):
+
+def load_mandate(override_cap=None):
+    mandate = dict(MANDATE)
+    mandate_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mandate.yml")
+    if os.path.exists(mandate_path):
+        try:
+            with open(mandate_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("max_notional_usd:"):
+                        val = line.split(":", 1)[1].strip()
+                        mandate["max_notional_usd"] = float(val)
+        except Exception:
+            pass
+    env_cap = os.environ.get("DESKFLOW_MAX_NOTIONAL_USD")
+    if env_cap:
+        try:
+            mandate["max_notional_usd"] = float(env_cap)
+        except ValueError:
+            pass
+    if override_cap is not None:
+        try:
+            mandate["max_notional_usd"] = float(override_cap)
+        except ValueError:
+            pass
+    return mandate
+
+def parse_order(raw_text, custom_cap=None):
     text = raw_text.strip().lower()
 
     # Check prohibited venues or leverage
@@ -135,11 +162,12 @@ def parse_order(raw_text):
     if notional <= 0:
         return {"valid": False, "code": "REJECT DATA", "reason": "Order notional amount must be greater than zero"}
 
-    if notional > MANDATE["max_notional_usd"]:
+    active_mandate = load_mandate(custom_cap)
+    if notional > active_mandate["max_notional_usd"]:
         return {
             "valid": False,
             "code": "REJECT SIZE",
-            "reason": f"Order size ${notional:.2f} exceeds mandate cap ${MANDATE['max_notional_usd']:.2f}"
+            "reason": f"Order size ${notional:.2f} exceeds configured mandate cap ${active_mandate['max_notional_usd']:.2f}"
         }
 
     # Extract target asset dynamically across Binance universe
@@ -159,9 +187,9 @@ def parse_order(raw_text):
     }
 
 
-def price_parent_order(order_text):
+def price_parent_order(order_text, custom_cap=None):
     global ORDER_COUNTER
-    parsed = parse_order(order_text)
+    parsed = parse_order(order_text, custom_cap)
     if not parsed["valid"]:
         return parsed
 
@@ -338,8 +366,8 @@ def run_test_suite():
     return True
 
 
-def run_cli_order(order_text):
-    priced = price_parent_order(order_text)
+def run_cli_order(order_text, custom_cap=None):
+    priced = price_parent_order(order_text, custom_cap)
     if not priced.get("valid"):
         print(f"\n[REJECT] Code: {priced['code']}")
         print(f"Reason: {priced['reason']}")
@@ -451,7 +479,7 @@ def run_mcp_server():
 
                 if tool_name == "deskflow_price_order":
                     order_text = args.get("order_text", "")
-                    priced = price_parent_order(order_text)
+                    priced = price_parent_order(order_text, custom_cap)
                     content = json.dumps(priced, indent=2)
                 elif tool_name == "deskflow_confirm_execution":
                     po_id = args.get("po_id", "")
@@ -497,6 +525,7 @@ def main():
     parser.add_argument("order", nargs="?", help="Natural language order prompt or command keyword")
     parser.add_argument("--test", action="store_true", help="Run automated test suite")
     parser.add_argument("--mcp", action="store_true", help="Start DeskFlow as Stdio MCP server")
+    parser.add_argument("--cap", type=float, help="Configure maximum notional mandate cap in USD (e.g. 50.00)")
 
     args = parser.parse_args()
 
@@ -506,7 +535,7 @@ def main():
     elif args.mcp or cmd == "mcp":
         run_mcp_server()
     elif args.order:
-        run_cli_order(args.order)
+        run_cli_order(args.order, args.cap)
     else:
         print("DeskFlow Execution Clerk CLI")
         print("Usage:")

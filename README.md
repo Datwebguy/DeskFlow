@@ -68,7 +68,7 @@ Trading with autonomous artificial intelligence introduces critical risks, inclu
 The mandate document acts as an immutable boundary. The agent cannot override its boundaries regardless of user phrasing. Every incoming request is parsed dynamically for asset identity, side, notional value, and venue requirements. Any order violating size limits, attempting leverage, or failing authentication is rejected immediately before any trade execution endpoint is reached.
 
 > [!IMPORTANT]
-> The mandate establishes non negotiable safeguards. The maximum order size is capped at ten United States dollars notional value. Futures, perpetual contracts, margin borrows, and capital withdrawals are denied unconditionally.
+> The mandate establishes non negotiable safeguards. The default maximum order size is capped at ten United States dollars notional value. Operators can adjust this capital ceiling to fifty dollars or any institutional threshold by editing mandate.yml, setting the DESKFLOW_MAX_NOTIONAL_USD environment variable, or passing the cap argument. Futures, perpetual contracts, margin borrows, and capital withdrawals remain denied unconditionally.
 
 ## Four Stage Execution Lifecycle
 
@@ -85,8 +85,9 @@ DeskFlow exposes four standardized tools over standard input and output, allowin
 
 | Tool Name | Input Arguments | Operation and Output |
 |---|---|---|
-| `deskflow_price_order` | `{"order_text": string}` | Parses dynamic prompt, validates mandate, queries live Binance liquidity, emits pretrade ticket |
+| `deskflow_price_order` | `{"order_text": string, "max_notional_usd"?: number}` | Parses dynamic prompt, validates mandate, queries live Binance liquidity, emits pretrade ticket |
 | `deskflow_confirm_execution` | `{"po_id": string, "confirm_token": string}` | Verifies authorization token, executes order on selected venue, computes shortfall, appends blotter |
+| `deskflow_update_mandate` | `{"max_notional_usd": number}` | Adjusts the active session capital ceiling (for example raising cap from ten to fifty dollars) |
 | `deskflow_inspect_blotter` | `{}` | Returns complete markdown blotter audit trail with historical execution shortfall metrics |
 | `deskflow_verify_mandate` | `{}` | Returns active governing constraints including size caps, permitted venues, and confirmation mandates |
 
