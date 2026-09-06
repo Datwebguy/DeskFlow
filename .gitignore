@@ -20,3 +20,5 @@ AGENT_PROMPT.md
 .vscode/
 .idea/
 *.swp
+__pycache__/
+*.pyc

@@ -615,14 +615,15 @@
         </div>
         <div class="terminal_content">
           <div class="quick_chips">
-            <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB (Valid Cash)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC (Valid Cash)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 25 USD BNB. Cash only.')">Buy 25 USD BNB (Size Exceeds Cap)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB 20x perps')">Buy 5 USD BNB 20x (Leverage Denied)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 3 USD SOLANA. Cash only.')">Buy 3 USD SOLANA (Solana)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB (BNB)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC (Bitcoin)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 25 USD SOL. Cash only.')">Buy 25 USD SOL (Exceeds Cap)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 5 USD SOL 20x perps')">Buy 5 USD SOL 20x (Denied Leverage)</button>
           </div>
 
           <div class="interactive_input_row">
-            <input type="text" id="order_input" class="cli_input" value="Buy 5 USD BNB. Cash only." placeholder="Type natural language prompt e.g. Buy 5 USD BNB. Cash only.">
+            <input type="text" id="order_input" class="cli_input" value="Buy 3 USD SOLANA. Cash only." placeholder="Type natural language prompt e.g. Buy 5 USD BNB. Cash only.">
             <button class="cli_btn" onclick="executePrompt()">Evaluate</button>
           </div>
 
@@ -811,6 +812,44 @@ python deskflow.py test
     syncTicker();
     setInterval(syncTicker, 5000);
 
+        // Universal Asset Parser
+    const ASSET_ALIASES = {
+      'solana': 'SOL', 'sol': 'SOL',
+      'bitcoin': 'BTC', 'btc': 'BTC',
+      'ethereum': 'ETH', 'ether': 'ETH', 'eth': 'ETH',
+      'binance': 'BNB', 'bnb': 'BNB',
+      'dogecoin': 'DOGE', 'doge': 'DOGE',
+      'ripple': 'XRP', 'xrp': 'XRP',
+      'cardano': 'ADA', 'ada': 'ADA',
+      'avalanche': 'AVAX', 'avax': 'AVAX',
+      'sui': 'SUI', 'near': 'NEAR', 'pepe': 'PEPE',
+      'chainlink': 'LINK', 'link': 'LINK',
+      'polkadot': 'DOT', 'dot': 'DOT',
+      'shiba': 'SHIB', 'shib': 'SHIB',
+      'ton': 'TON', 'toncoin': 'TON',
+      'tron': 'TRX', 'trx': 'TRX',
+      'aptos': 'APT', 'apt': 'APT'
+    };
+
+    const STOP_WORDS = new Set([
+      'buy', 'sell', 'usd', 'usdt', 'dollars', 'dollar', 'cash', 'only',
+      'perps', 'perp', 'for', 'in', 'at', 'the', 'of', 'and', 'with', 'order'
+    ]);
+
+    function extractAsset(text) {
+      const clean = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+      const words = clean.split(/\s+/).filter(Boolean);
+      for (const w of words) {
+        if (ASSET_ALIASES[w]) return ASSET_ALIASES[w];
+      }
+      for (const w of words) {
+        if (!STOP_WORDS.has(w) && !/^\d+$/.test(w)) {
+          if (w.length >= 2 && w.length <= 6) return w.toUpperCase();
+        }
+      }
+      return null;
+    }
+
     // Interactive Console Logic (Dynamic, Zero Mock)
     let activeTicket = null;
     let orderNum = 1;
@@ -877,21 +916,20 @@ python deskflow.py test
         return;
       }
 
-      // Extract asset
-      let asset = 'BNB';
-      const assets = ['bnb', 'btc', 'eth', 'sol'];
-      for (const a of assets) {
-        if (new RegExp('\\b' + a + '\\b').test(lower)) {
-          asset = a.toUpperCase();
-          break;
-        }
+      // Extract asset dynamically across Binance universe
+      const asset = extractAsset(input);
+      if (!asset) {
+        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Target Asset</span>\n' +
+          'Violation: Specify target coin or token name (e.g. SOLANA, BTC, ETH, BNB, DOGE).';
+        return;
       }
 
-      display.innerText = 'Connecting to Binance order book for ' + asset + 'USDT...';
+      const symbol = asset + 'USDT';
+      display.innerText = 'Connecting to Binance public order book for ' + symbol + '...';
 
-      let mid = liveBook.mid;
-      let ask = liveBook.ask;
-      let symbol = asset + 'USDT';
+      let mid = 100.0;
+      let ask = 100.01;
+      let foundSymbol = false;
 
       try {
         const r = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=' + symbol);
@@ -901,8 +939,19 @@ python deskflow.py test
           const a = parseFloat(d.askPrice);
           mid = (b + a) / 2.0;
           ask = a;
+          foundSymbol = true;
+        } else {
+          display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Unknown Trading Pair</span>\n' +
+            'Violation: Trading pair ' + symbol + ' is not listed on Binance liquidity rails.';
+          return;
         }
-      } catch (err) {}
+      } catch (err) {
+        // Fallback for offline environments
+        if (asset === 'SOL') { mid = 104.095; ask = 104.10; }
+        else if (asset === 'BNB') { mid = liveBook.mid; ask = liveBook.ask; }
+        else if (asset === 'BTC') { mid = 87420.50; ask = 87421.00; }
+        else if (asset === 'ETH') { mid = 2410.55; ask = 2410.60; }
+      }
 
       const poId = 'PO_' + String(orderNum).padStart(3, '0');
       const estQty = (notional / ask).toFixed(8);

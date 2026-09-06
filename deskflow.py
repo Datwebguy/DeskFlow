@@ -32,6 +32,43 @@ ORDER_COUNTER = 1
 BLOTTER_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "blotter.md")
 
 
+ASSET_ALIASES = {
+    "solana": "SOL", "sol": "SOL",
+    "bitcoin": "BTC", "btc": "BTC",
+    "ethereum": "ETH", "ether": "ETH", "eth": "ETH",
+    "binance": "BNB", "bnb": "BNB",
+    "dogecoin": "DOGE", "doge": "DOGE",
+    "ripple": "XRP", "xrp": "XRP",
+    "cardano": "ADA", "ada": "ADA",
+    "avalanche": "AVAX", "avax": "AVAX",
+    "sui": "SUI", "near": "NEAR", "pepe": "PEPE",
+    "chainlink": "LINK", "link": "LINK",
+    "polkadot": "DOT", "dot": "DOT",
+    "shiba": "SHIB", "shib": "SHIB",
+    "ton": "TON", "toncoin": "TON",
+    "tron": "TRX", "trx": "TRX",
+    "aptos": "APT", "apt": "APT"
+}
+
+STOP_WORDS = {
+    "buy", "sell", "usd", "usdt", "dollars", "dollar", "cash", "only",
+    "perps", "perp", "for", "in", "at", "the", "of", "and", "with", "order"
+}
+
+def extract_asset(text):
+    clean = re.sub(r"[^a-zA-Z0-9\s]", " ", text.lower())
+    words = clean.split()
+    # Check aliases first
+    for w in words:
+        if w in ASSET_ALIASES:
+            return ASSET_ALIASES[w]
+    # Check any candidate token of 2-6 chars
+    for w in words:
+        if w not in STOP_WORDS and not w.isdigit():
+            if 2 <= len(w) <= 6:
+                return w.upper()
+    return None
+
 def get_live_ticker(symbol="BNBUSDT"):
     url = f"https://api.binance.com/api/v3/ticker/bookTicker?symbol={symbol}"
     try:
@@ -42,8 +79,16 @@ def get_live_ticker(symbol="BNBUSDT"):
             ask = float(data["askPrice"])
             mid = (bid + ask) / 2.0
             return {"bid": bid, "ask": ask, "mid": mid, "symbol": symbol, "live": True}
-    except Exception:
-        return {"bid": 775.74, "ask": 775.75, "mid": 775.7450, "symbol": symbol, "live": False}
+    except Exception as e:
+        # Fallback values for common symbols if offline
+        fallbacks = {
+            "BNBUSDT": {"bid": 765.54, "ask": 765.55, "mid": 765.5450},
+            "SOLUSDT": {"bid": 104.04, "ask": 104.05, "mid": 104.0450},
+            "BTCUSDT": {"bid": 87420.00, "ask": 87421.00, "mid": 87420.50},
+            "ETHUSDT": {"bid": 2410.50, "ask": 2410.60, "mid": 2410.55}
+        }
+        fb = fallbacks.get(symbol, {"bid": 100.00, "ask": 100.01, "mid": 100.0050})
+        return {"bid": fb["bid"], "ask": fb["ask"], "mid": fb["mid"], "symbol": symbol, "live": False}
 
 
 def parse_order(raw_text):
@@ -97,12 +142,14 @@ def parse_order(raw_text):
             "reason": f"Order size ${notional:.2f} exceeds mandate cap ${MANDATE['max_notional_usd']:.2f}"
         }
 
-    # Extract target asset dynamically
-    asset = "BNB"
-    for candidate in ["bnb", "btc", "eth", "sol", "fdusd"]:
-        if re.search(r"\b" + candidate + r"\b", text):
-            asset = candidate.upper()
-            break
+    # Extract target asset dynamically across Binance universe
+    asset = extract_asset(text)
+    if not asset:
+        return {
+            "valid": False,
+            "code": "REJECT DATA",
+            "reason": "Missing target asset in order prompt (e.g. SOL, BTC, ETH, BNB)"
+        }
 
     return {
         "valid": True,
