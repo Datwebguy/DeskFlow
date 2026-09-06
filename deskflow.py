@@ -413,7 +413,30 @@ def run_mcp_server():
             req_id = req.get("id")
             method = req.get("method")
 
-            if method == "tools/list":
+            if method == "initialize":
+                resp = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "protocolVersion": "2024-11-05",
+                        "capabilities": {
+                            "tools": {}
+                        },
+                        "serverInfo": {
+                            "name": "deskflow",
+                            "version": "1.0.0"
+                        }
+                    }
+                }
+                sys.stdout.write(json.dumps(resp) + "\n")
+                sys.stdout.flush()
+            elif method == "notifications/initialized":
+                pass
+            elif method == "ping":
+                resp = {"jsonrpc": "2.0", "id": req_id, "result": {}}
+                sys.stdout.write(json.dumps(resp) + "\n")
+                sys.stdout.flush()
+            elif method == "tools/list":
                 resp = {
                     "jsonrpc": "2.0",
                     "id": req_id,
