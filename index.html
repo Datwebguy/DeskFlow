@@ -391,6 +391,70 @@
     }
     .footer_inner a { color: var(--text-soft); }
     .footer_inner a:hover { color: var(--gold); }
+  
+    /* Agent OS Chat Interface */
+    .chat_container {
+      background: #080b11; border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      display: flex; flex-direction: column;
+    }
+    .chat_topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; background: var(--surface-raised); border-bottom: 1px solid var(--border);
+    }
+    .chat_agent_info { display: flex; align-items: center; gap: 12px; }
+    .agent_avatar {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      color: #000; font-weight: 800; font-size: 14px;
+    }
+    .agent_meta_title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .agent_meta_sub { font-family: var(--mono); font-size: 10.5px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+    .chat_feed {
+      padding: 24px; min-height: 380px; max-height: 520px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 18px; background: #05070a;
+    }
+    .msg_row { display: flex; flex-direction: column; max-width: 82%; animation: fadeInMsg 0.25s ease-out; }
+    @keyframes fadeInMsg { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .msg_user { align-self: flex-end; }
+    .msg_agent { align-self: flex-start; }
+    .msg_label {
+      font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 5px;
+    }
+    .msg_user .msg_label { color: var(--text-muted); text-align: right; }
+    .msg_agent .msg_label { color: var(--gold); }
+    .bubble {
+      padding: 16px 20px; font-size: 14px; line-height: 1.65;
+    }
+    .msg_user .bubble {
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: 14px 14px 2px 14px; color: var(--text);
+    }
+    .msg_agent .bubble {
+      background: var(--surface); border: 1px solid rgba(240, 185, 11, 0.25);
+      border-radius: 14px 14px 14px 2px; color: var(--text-soft);
+    }
+    .ticket_card {
+      margin-top: 12px; padding: 16px; background: #040508;
+      border: 1px solid var(--border); border-radius: 8px; font-family: var(--mono); font-size: 12.5px;
+    }
+    .ticket_row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+    .ticket_row:last-child { border-bottom: none; }
+    .ticket_label { color: var(--text-muted); }
+    .ticket_val { color: var(--text); font-weight: 600; }
+    .chat_action_btn {
+      display: inline-block; margin-top: 14px; font-family: var(--mono);
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #000; background: var(--green); padding: 9px 18px; border-radius: 6px;
+      cursor: pointer; transition: filter 0.2s;
+    }
+    .chat_action_btn:hover { filter: brightness(1.1); }
+    .chat_input_wrap {
+      padding: 18px 24px; background: var(--surface-raised); border-top: 1px solid var(--border);
+    }
+
   </style>
 </head>
 <body>
@@ -606,56 +670,64 @@
   </section>
 
   <!-- Interactive Live Terminal Section -->
+    <!-- Interactive Live Agent Chat Section -->
   <section id="console">
     <div class="container">
-      <span class="sec_badge">Interactive Mandate Terminal</span>
-      <h2 class="sec_heading">Live order simulation. Zero mock data.</h2>
+      <span class="sec_badge">Live Agent Interaction</span>
+      <h2 class="sec_heading">Chat with the clerk. Governed in real time.</h2>
       <p class="sec_caption">
-        Input any natural language parent order. The clerk dynamically extracts capital size, queries live Binance order book depth, enforces mandate limits, and issues pretrade tickets with explicit confirmation requirements.
+        Experience how an autonomous AI agent interacts with DeskFlow. Prompt the agent in natural conversation. DeskFlow validates your mandate boundaries, pulls live Binance market depth, and halts execution until you explicitly authorize the parent order.
       </p>
 
-      <div class="terminal_container">
-        <div class="terminal_bar">
-          <span style="font-family: var(--mono); font-weight: 700; font-size: 12.5px; color: var(--text);">DESKFLOW CLERK CONSOLE</span>
-          <div class="terminal_status">
-            <span class="dot_green"></span>
-            <span>Live Binance REST Active</span>
-          </div>
-        </div>
-                <div class="terminal_content">
-          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding: 14px 18px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 8px;">
-            <span style="font-family: var(--mono); font-size: 12px; color: var(--text-soft); font-weight: 600;">
-              Mandate Capital Ceiling: <b id="cap_display" style="color: var(--gold);">$10.00 USD</b>
-            </span>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="cap_choice active" onclick="setCeiling(10, this)">$10 Default</button>
-              <button class="cap_choice" onclick="setCeiling(50, this)">$50 Cap</button>
-              <button class="cap_choice" onclick="setCeiling(100, this)">$100 Cap</button>
-              <button class="cap_choice" onclick="setCeiling(500, this)">$500 Cap</button>
+      <div class="chat_container">
+        <div class="chat_topbar">
+          <div class="chat_agent_info">
+            <div class="agent_avatar">D</div>
+            <div>
+              <div class="agent_meta_title">DeskFlow Agent Clerk</div>
+              <div class="agent_meta_sub">
+                <span class="pulse_circle" style="background: var(--green); box-shadow: 0 0 6px var(--green); width: 6px; height: 6px;"></span>
+                <span>Agent OS Active · Scoped to AGENTIC_SUB</span>
+              </div>
             </div>
           </div>
+          <button onclick="resetConversation()" class="btn_secondary" style="padding: 6px 14px; font-size: 11px;">Reset Chat</button>
+        </div>
 
-          <div class="quick_chips">
-            <button class="quick_chip" onclick="applyPreset('Buy 3 USD SOLANA. Cash only.')">Buy 3 USD SOLANA (Solana)</button>
+        <div style="padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <span style="font-family: var(--mono); font-size: 12px; color: var(--text-soft); font-weight: 600;">
+            Active Mandate Ceiling: <b id="cap_display" style="color: var(--gold);">$10.00 USD</b>
+          </span>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="cap_choice active" onclick="setCeiling(10, this)">$10 Default</button>
+            <button class="cap_choice" onclick="setCeiling(50, this)">$50 Cap</button>
+            <button class="cap_choice" onclick="setCeiling(100, this)">$100 Cap</button>
+            <button class="cap_choice" onclick="setCeiling(500, this)">$500 Cap</button>
+          </div>
+        </div>
+
+        <div id="chat_feed" class="chat_feed">
+          <div class="msg_row msg_agent">
+            <div class="msg_label">DeskFlow Clerk · Agent OS</div>
+            <div class="bubble">
+              Ready to govern your parent orders. I enforce cash only execution, check your capital ceiling, and query live Binance liquidity across Spot versus Convert rails. What would you like to buy?
+            </div>
+          </div>
+        </div>
+
+        <div class="chat_input_wrap">
+          <div class="quick_chips" style="margin-bottom: 14px;">
+            <button class="quick_chip" onclick="applyPreset('Buy 3 USD SOLANA. Cash only.')">Buy 3 USD SOLANA</button>
             <button class="quick_chip" onclick="applyPreset('Buy 50 USD SOL. Cash only.')">Buy 50 USD SOL (Test $50 Cap)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB (BNB)</button>
-            <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC (Bitcoin)</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 5 USD BNB. Cash only.')">Buy 5 USD BNB</button>
+            <button class="quick_chip" onclick="applyPreset('Buy 7.50 USD BTC. Cash only.')">Buy 7.50 USD BTC</button>
             <button class="quick_chip" onclick="applyPreset('Buy 5 USD SOL 20x perps')">Buy 5 USD SOL 20x (Denied Leverage)</button>
           </div>
 
-          <div class="interactive_input_row">
-            <input type="text" id="order_input" class="cli_input" value="Buy 3 USD SOLANA. Cash only." placeholder="Type natural language prompt e.g. Buy 5 USD BNB. Cash only.">
-            <button class="cli_btn" onclick="executePrompt()">Evaluate</button>
+          <div class="interactive_input_row" style="margin-bottom: 0;">
+            <input type="text" id="order_input" class="cli_input" value="Buy 3 USD SOLANA. Cash only." placeholder="Chat with agent e.g. Buy 3 USD SOLANA. Cash only." onkeydown="if(event.key === 'Enter') executePrompt();">
+            <button class="cli_btn" onclick="executePrompt()">Send</button>
           </div>
-
-          <div id="cli_display" class="terminal_display">Console initialized. Awaiting operator instruction. Type a prompt or click a preset chip above.</div>
-
-          <div id="auth_row" class="auth_gate">
-            <div id="auth_info" class="auth_text">Pretrade ticket generated. Explicit confirmation required.</div>
-            <button id="auth_btn" class="btn_confirm" onclick="authorizeFill()">Confirm PO_001</button>
-          </div>
-
-          <div id="receipt_mount"></div>
         </div>
       </div>
     </div>
@@ -837,7 +909,7 @@ python deskflow.py test
     syncTicker();
     setInterval(syncTicker, 5000);
 
-        // Universal Asset Parser
+            // Universal Asset Parser
     const ASSET_ALIASES = {
       'solana': 'SOL', 'sol': 'SOL',
       'bitcoin': 'BTC', 'btc': 'BTC',
@@ -875,18 +947,53 @@ python deskflow.py test
       return null;
     }
 
-    // Interactive Console Logic (Dynamic, Zero Mock)
     let currentCeiling = 10.00;
+    let pendingTicket = null;
+    let orderSequence = 1;
 
     function setCeiling(amount, btn) {
       currentCeiling = parseFloat(amount);
       document.getElementById('cap_display').innerText = '$' + currentCeiling.toFixed(2) + ' USD';
       document.querySelectorAll('.cap_choice').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      executePrompt();
     }
-    let activeTicket = null;
-    let orderNum = 1;
+
+    function resetConversation() {
+      const feed = document.getElementById('chat_feed');
+      feed.innerHTML = `
+        <div class="msg_row msg_agent">
+          <div class="msg_label">DeskFlow Clerk · Agent OS</div>
+          <div class="bubble">
+            Conversation reset. Ready to govern your parent orders. Enter an order prompt below or select a preset chip.
+          </div>
+        </div>
+      `;
+      pendingTicket = null;
+    }
+
+    function appendUserMessage(text) {
+      const feed = document.getElementById('chat_feed');
+      const div = document.createElement('div');
+      div.className = 'msg_row msg_user';
+      div.innerHTML = `
+        <div class="msg_label">Operator</div>
+        <div class="bubble">${text}</div>
+      `;
+      feed.appendChild(div);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function appendAgentMessage(htmlContent) {
+      const feed = document.getElementById('chat_feed');
+      const div = document.createElement('div');
+      div.className = 'msg_row msg_agent';
+      div.innerHTML = `
+        <div class="msg_label">DeskFlow Clerk · Agent OS</div>
+        <div class="bubble">${htmlContent}</div>
+      `;
+      feed.appendChild(div);
+      feed.scrollTop = feed.scrollHeight;
+    }
 
     function applyPreset(text) {
       document.getElementById('order_input').value = text;
@@ -894,76 +1001,81 @@ python deskflow.py test
     }
 
     async function executePrompt() {
-      const input = document.getElementById('order_input').value.trim();
+      const inputField = document.getElementById('order_input');
+      const input = inputField.value.trim();
+      if (!input) return;
+
+      appendUserMessage(input);
+      inputField.value = '';
+
       const lower = input.toLowerCase();
-      const display = document.getElementById('cli_display');
-      const authRow = document.getElementById('auth_row');
-      const receiptMount = document.getElementById('receipt_mount');
 
-      authRow.style.display = 'none';
-      receiptMount.innerHTML = '';
-
-      if (!input) {
-        display.innerText = 'Error: Please enter an order prompt.';
+      if (pendingTicket && lower === 'confirm ' + pendingTicket.poId.toLowerCase()) {
+        authorizeFill();
         return;
       }
 
-      // Check denied venues
       const deniedList = ['futures', 'margin', 'perps', 'perp', 'leverage'];
       for (const d of deniedList) {
         if (lower.includes(d) || /\b\d+x\b/.test(lower)) {
-          display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT VENUE] Mandate Safeguard Intercept</span>\n' +
-            'Violation: Prohibited venue or leverage detected (' + d + ') denied by mandate.\n' +
-            'Clerk Action: Pipeline terminated immediately. Zero orders dispatched to Binance rails.';
+          appendAgentMessage(
+            '<span style="color: var(--red); font-weight: 700;">[REJECT VENUE] Mandate Safeguard Intercept</span><br>' +
+            'Violation: Prohibited venue or leverage detected (' + d + ') denied by mandate.<br>' +
+            'Clerk Action: Pipeline terminated immediately. Zero orders dispatched to exchange rails.'
+          );
           return;
         }
       }
 
-      // Check side
       const isBuy = lower.includes('buy');
       const isSell = lower.includes('sell');
       if (!isBuy && !isSell) {
-        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Action</span>\n' +
-          'Violation: Prompt must explicitly specify buy or sell action.';
+        appendAgentMessage(
+          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Action</span><br>' +
+          'Violation: Prompt must explicitly specify buy or sell action.'
+        );
         return;
       }
 
-      // Extract dynamic notional size
       const sizeMatch = lower.match(/(?:\$|\b)(\d+(?:\.\d+)?)\s*(?:usd|usdt|dollars?|\$|\b)/) || lower.match(/(\d+(?:\.\d+)?)\s*(?:usd|usdt|\$)/);
       if (!sizeMatch) {
-        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Notional Size</span>\n' +
-          'Violation: Specify dynamic order amount (e.g. 5 USD or 7.50 USDT).';
+        appendAgentMessage(
+          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Notional Size</span><br>' +
+          'Violation: Specify dynamic order amount (e.g. 3 USD or 50 USDT).'
+        );
         return;
       }
 
       const notional = parseFloat(sizeMatch[1]);
       if (notional <= 0) {
-        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Invalid Size</span>\n' +
-          'Violation: Capital amount must exceed zero.';
+        appendAgentMessage(
+          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Invalid Size</span><br>' +
+          'Violation: Capital amount must exceed zero.'
+        );
         return;
       }
 
       if (notional > currentCeiling) {
-        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT SIZE] Mandate Cap Exceeded</span>\n' +
-          'Violation: Order amount $' + notional.toFixed(2) + ' exceeds configured mandate cap of $' + currentCeiling.toFixed(2) + '.\n' +
-          'Clerk Action: Trade blocked. Switch to a higher mandate ceiling above or reduce order size.';
+        appendAgentMessage(
+          '<span style="color: var(--red); font-weight: 700;">[REJECT SIZE] Mandate Cap Exceeded</span><br>' +
+          'Violation: Order amount $' + notional.toFixed(2) + ' exceeds active mandate cap of $' + currentCeiling.toFixed(2) + '.<br>' +
+          'Clerk Action: Trade blocked. Increase the mandate ceiling selector above or reduce order size.'
+        );
         return;
       }
 
-      // Extract asset dynamically across Binance universe
       const asset = extractAsset(input);
       if (!asset) {
-        display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Target Asset</span>\n' +
-          'Violation: Specify target coin or token name (e.g. SOLANA, BTC, ETH, BNB, DOGE).';
+        appendAgentMessage(
+          '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Missing Target Asset</span><br>' +
+          'Violation: Specify target coin name (e.g. SOLANA, BTC, ETH, BNB, DOGE).'
+        );
         return;
       }
 
       const symbol = asset + 'USDT';
-      display.innerText = 'Connecting to Binance public order book for ' + symbol + '...';
-
       let mid = 100.0;
       let ask = 100.01;
-      let foundSymbol = false;
 
       try {
         const r = await fetch('https://api.binance.com/api/v3/ticker/bookTicker?symbol=' + symbol);
@@ -973,25 +1085,25 @@ python deskflow.py test
           const a = parseFloat(d.askPrice);
           mid = (b + a) / 2.0;
           ask = a;
-          foundSymbol = true;
         } else {
-          display.innerHTML = '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Unknown Trading Pair</span>\n' +
-            'Violation: Trading pair ' + symbol + ' is not listed on Binance liquidity rails.';
+          appendAgentMessage(
+            '<span style="color: var(--red); font-weight: 700;">[REJECT DATA] Unknown Trading Pair</span><br>' +
+            'Violation: Trading pair ' + symbol + ' is not listed on Binance liquidity rails.'
+          );
           return;
         }
       } catch (err) {
-        // Fallback for offline environments
         if (asset === 'SOL') { mid = 104.095; ask = 104.10; }
         else if (asset === 'BNB') { mid = liveBook.mid; ask = liveBook.ask; }
         else if (asset === 'BTC') { mid = 87420.50; ask = 87421.00; }
         else if (asset === 'ETH') { mid = 2410.55; ask = 2410.60; }
       }
 
-      const poId = 'PO_' + String(orderNum).padStart(3, '0');
+      const poId = 'PO_' + String(orderSequence).padStart(3, '0');
       const estQty = (notional / ask).toFixed(8);
       const estFee = (notional * 0.001).toFixed(4);
 
-      activeTicket = {
+      pendingTicket = {
         poId,
         side: isBuy ? 'BUY' : 'SELL',
         asset,
@@ -1004,61 +1116,68 @@ python deskflow.py test
         venue: 'SPOT'
       };
 
-      display.innerHTML = '<span style="color: var(--green); font-weight: 700;">[MANDATE PASSED · PRETRADE TICKET GENERATED]</span>\n' +
-        'Parent Order ID : <span style="color: var(--gold); font-weight: 700;">' + poId + '</span>\n' +
-        'Instrument      : ' + symbol + '\n' +
-        'Planned Capital : $' + notional.toFixed(2) + ' USD (Within $' + currentCeiling.toFixed(2) + ' cap)\n' +
-        'Decision Mid    : ' + mid.toFixed(4) + ' USDT\n' +
-        'Spot Touch Ask  : ' + ask.toFixed(4) + ' USDT\n' +
-        'Estimated Qty   : ' + estQty + ' ' + asset + '\n' +
-        'Convert Quote   : QUOTE ON CONFIRM\n' +
-        'Selected Venue  : SPOT (Optimal touch liquidity)\n' +
-        'Subaccount      : AGENTIC_SUB\n' +
-        'Execution State : <span style="color: var(--gold); font-weight: 700;">AWAITING OPERATOR CONFIRMATION</span>';
+      const ticketHtml = `
+        <span style="color: var(--green); font-weight: 700;">[MANDATE PASSED · PRETRADE TICKET ISSUED]</span><br>
+        I have evaluated your order against the mandate and queried live Binance depth.
+        <div class="ticket_card">
+          <div class="ticket_row"><span class="ticket_label">Parent Order ID</span><span class="ticket_val" style="color: var(--gold);">${poId}</span></div>
+          <div class="ticket_row"><span class="ticket_label">Instrument</span><span class="ticket_val">${symbol}</span></div>
+          <div class="ticket_row"><span class="ticket_label">Planned Capital</span><span class="ticket_val">$${notional.toFixed(2)} USD</span></div>
+          <div class="ticket_row"><span class="ticket_label">Decision Mid</span><span class="ticket_val">${mid.toFixed(4)} USDT</span></div>
+          <div class="ticket_row"><span class="ticket_label">Spot Touch Ask</span><span class="ticket_val">${ask.toFixed(4)} USDT</span></div>
+          <div class="ticket_row"><span class="ticket_label">Estimated Fill</span><span class="ticket_val">${estQty} ${asset}</span></div>
+          <div class="ticket_row"><span class="ticket_label">Venue Selected</span><span class="ticket_val" style="color: var(--gold);">SPOT (Immediate liquidity)</span></div>
+          <div class="ticket_row"><span class="ticket_label">Convert Quote</span><span class="ticket_val">QUOTE ON CONFIRM</span></div>
+          <div class="ticket_row"><span class="ticket_label">Isolated Fee</span><span class="ticket_val">${estFee} USDT</span></div>
+        </div>
+        <div style="margin-top: 10px; font-size: 13px;">
+          By mandate rules, I am strictly prohibited from trading until you confirm. Please type <b>CONFIRM ${poId}</b> or click below to authorize:
+        </div>
+        <button class="chat_action_btn" onclick="authorizeFill()">CONFIRM ${poId}</button>
+      `;
 
-      document.getElementById('auth_info').innerHTML = 'Action Required: Authorize <b>' + poId + '</b> ($' + notional.toFixed(2) + ' ' + asset + ')';
-      document.getElementById('auth_btn').innerText = 'CONFIRM ' + poId;
-      authRow.style.display = 'flex';
+      appendAgentMessage(ticketHtml);
     }
 
     function authorizeFill() {
-      if (!activeTicket) return;
-      const t = activeTicket;
-      document.getElementById('auth_row').style.display = 'none';
+      if (!pendingTicket) return;
+      const t = pendingTicket;
+      pendingTicket = null;
+
+      appendUserMessage('CONFIRM ' + t.poId);
 
       const execPrice = t.ask;
       const mid = t.mid;
       const shortfallBps = (((execPrice - mid) / mid) * 10000).toFixed(2);
       const shortfallStr = (parseFloat(shortfallBps) >= 0 ? '+' : '') + shortfallBps + ' bps';
 
-      const display = document.getElementById('cli_display');
-      display.innerHTML += '\n\n<span style="color: var(--green); font-weight: 700;">[EXECUTION COMMITTED TO BLOTTER]</span>\n' +
-        'Authorization Verified: CONFIRM ' + t.poId + '\n' +
-        'Venue Filled: ' + t.venue + ' at ' + execPrice.toFixed(4) + ' USDT\n' +
-        'Shortfall: ' + shortfallStr + ' | Fee Isolated: ' + t.estFee + ' USDT\n' +
-        'Record appended to immutable blotter ledger.';
+      const receiptHtml = `
+        <span style="color: var(--green); font-weight: 700;">[EXECUTION COMMITTED TO BLOTTER]</span><br>
+        Authorization verified: CONFIRM ${t.poId}. Order executed on venue ${t.venue} at ${execPrice.toFixed(4)} USDT.
+        <div class="receipt_display">
+          <div class="rc_head">
+            <span class="rc_title">DESKFLOW EXECUTION RECEIPT · BINANCE AGENT OS</span>
+            <span class="rc_status">STATUS: FILLED</span>
+          </div>
+          <div class="rc_grid">
+            <div class="rc_cell"><span>Parent Order ID</span><b>${t.poId}</b></div>
+            <div class="rc_cell"><span>Executed Venue</span><b>${t.venue}</b></div>
+            <div class="rc_cell"><span>Symbol</span><b>${t.symbol}</b></div>
+            <div class="rc_cell"><span>Planned Capital</span><b>$${t.notional.toFixed(2)} USD</b></div>
+            <div class="rc_cell"><span>Filled Quantity</span><b>${t.estQty} ${t.asset}</b></div>
+            <div class="rc_cell"><span>Execution Price</span><b>${execPrice.toFixed(4)} USDT</b></div>
+            <div class="rc_cell"><span>Decision Mid</span><b>${mid.toFixed(4)} USDT</b></div>
+            <div class="rc_cell"><span>Shortfall</span><b style="color: var(--gold);">${shortfallStr}</b></div>
+            <div class="rc_cell"><span>Isolated Fee</span><b>${t.estFee} USDT</b></div>
+          </div>
+        </div>
+        <div style="margin-top: 10px; font-family: var(--mono); font-size: 12px; color: var(--text-muted);">
+          Reconciled entry written to permanent blotter ledger.
+        </div>
+      `;
 
-      const receipt = '<div class="receipt_display">' +
-        '<div class="rc_head">' +
-          '<span class="rc_title">DESKFLOW EXECUTION RECEIPT · BINANCE AGENT OS</span>' +
-          '<span class="rc_status">STATUS: FILLED</span>' +
-        '</div>' +
-        '<div class="rc_grid">' +
-          '<div class="rc_cell"><span>Parent Order ID</span><b>' + t.poId + '</b></div>' +
-          '<div class="rc_cell"><span>Executed Venue</span><b>' + t.venue + '</b></div>' +
-          '<div class="rc_cell"><span>Symbol</span><b>' + t.symbol + '</b></div>' +
-          '<div class="rc_cell"><span>Planned Capital</span><b>$' + t.notional.toFixed(2) + ' USD</b></div>' +
-          '<div class="rc_cell"><span>Filled Quantity</span><b>' + t.estQty + ' ' + t.asset + '</b></div>' +
-          '<div class="rc_cell"><span>Execution Price</span><b>' + execPrice.toFixed(4) + ' USDT</b></div>' +
-          '<div class="rc_cell"><span>Decision Mid</span><b>' + mid.toFixed(4) + ' USDT</b></div>' +
-          '<div class="rc_cell"><span>Shortfall</span><b style="color: var(--gold);">' + shortfallStr + '</b></div>' +
-          '<div class="rc_cell"><span>Isolated Fee</span><b>' + t.estFee + ' USDT</b></div>' +
-        '</div>' +
-      '</div>';
-
-      document.getElementById('receipt_mount').innerHTML = receipt;
-      orderNum++;
-      activeTicket = null;
+      appendAgentMessage(receiptHtml);
+      orderSequence++;
     }
 
     // Dynamic wave mesh canvas
