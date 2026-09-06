@@ -397,6 +397,7 @@
         <span class="brand_badge">Binance Agent OS</span>
       </div>
       <div class="nav_menu">
+        <a href="#guide">Guide</a>
         <a href="#architecture">Architecture</a>
         <a href="#mandate">Mandate</a>
         <a href="#tools">Tool Registry</a>
@@ -421,7 +422,8 @@
         DeskFlow enforces capital boundaries, arbitrates live liquidity across Spot and Convert, requires explicit human authorization, and audits every fill to the basis point on an immutable ledger.
       </p>
       <div class="hero_actions">
-        <a href="#console" class="btn_primary">Open Live Terminal</a>
+        <a href="#guide" class="btn_primary">First Time Guide</a>
+        <a href="#console" class="btn_secondary">Open Live Terminal</a>
         <a href="#tools" class="btn_secondary">Inspect MCP Tools</a>
       </div>
 
@@ -481,6 +483,54 @@
   </div>
 
   <!-- Bento Grid Architecture -->
+  
+  <!-- First Time Operator Guide -->
+  <section id="guide" style="background: rgba(12, 15, 23, 0.4);">
+    <div class="container">
+      <span class="sec_badge">Quickstart Guide</span>
+      <h2 class="sec_heading">First time operator guide.</h2>
+      <p class="sec_caption">
+        Three simple paths to evaluate, test, and integrate DeskFlow in under sixty seconds.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <!-- Path 1: Instant Browser Test -->
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path One · Zero Install</div>
+          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Test in Your Browser</h3>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
+            Jump straight into the live terminal below. Type any natural language prompt or click a preset chip to watch DeskFlow enforce caps, pull live Binance order book depth, and request explicit authorization.
+          </p>
+          <a href="#console" class="btn_secondary" style="text-align: center; width: 100%;">Jump to Live Terminal</a>
+        </div>
+
+        <!-- Path 2: Standalone Local CLI -->
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Two · Local Machine</div>
+          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Run Local Python Clerk</h3>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
+            Run DeskFlow locally with zero external libraries. Run the automated test suite to verify mandate intercepts and receipt rendering, or execute a custom order prompt directly in your shell.
+          </p>
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text-soft);">
+            python deskflow.py test
+          </div>
+        </div>
+
+        <!-- Path 3: Agent OS & Claude Code -->
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Three · AI Agent Integration</div>
+          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Attach Model Context Protocol</h3>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
+            Attach DeskFlow to Claude Code, Cursor, or your Agent OS environment. Connect the clerk tool provider so your autonomous agent cannot execute orders without your explicit confirmation.
+          </p>
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text-soft);">
+            claude mcp add deskflow -- python deskflow.py mcp
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="architecture">
     <div class="container">
       <span class="sec_badge">System Architecture</span>
@@ -726,6 +776,7 @@ python deskflow.py test
       </div>
       <div>
         <a href="https://github.com/Datwebguy/DeskFlow" target="_blank">Repository</a> &nbsp;·&nbsp;
+        <a href="#guide">Guide</a>
         <a href="#architecture">Architecture</a> &nbsp;·&nbsp;
         <a href="#console">Live Terminal</a>
       </div>

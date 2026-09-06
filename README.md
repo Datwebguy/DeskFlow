@@ -4,6 +4,43 @@
 
 Live Interactive Terminal: https://datwebguy.github.io/DeskFlow/
 
+## First Time Operator Guide
+
+Choose the path that fits your workflow to start in under sixty seconds:
+
+### Path One · Instant Browser Test (Zero Setup)
+
+Visit the live interactive terminal at https://datwebguy.github.io/DeskFlow/
+
+Click any preset chip or type an order prompt like `"Buy 5 USD BNB. Cash only."` to observe real time pricing, mandate checks, and confirmation gates directly in your browser.
+
+### Path Two · Local Machine Execution
+
+Clone the repository and run directly with Python. No external dependencies required:
+
+```bash
+# Run automated verification suite
+python deskflow.py test
+
+# Execute dynamic order
+python deskflow.py "Buy 5 USD BNB. Cash only."
+```
+
+### Path Three · AI Agent Integration (Claude Code and Cursor)
+
+Attach DeskFlow as a Model Context Protocol tool provider:
+
+```bash
+# Step 1: Connect official Binance Agent OS gateway
+claude mcp add binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
+
+# Step 2: Attach DeskFlow execution clerk
+claude mcp add deskflow -- python deskflow.py mcp
+```
+
+Once attached, prompt your agent naturally: `"Buy 5 USD BNB. Cash only."` DeskFlow will intercept, price against live depth, issue ticket `PO_001`, and refuse execution until you reply: `CONFIRM PO_001`.
+
+
 ## Executive Summary
 
 DeskFlow is an institutional execution clerk engineered for the Binance Agent OS ecosystem. Modern autonomous agents are proficient at analyzing sentiment and proposing trades, yet they often lack financial discipline, execution boundaries, and posttrade accountability. DeskFlow resolves this vulnerability by placing a deterministic verification layer between natural language agent prompts and live exchange routing.
