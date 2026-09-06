@@ -557,47 +557,75 @@
 
   <!-- Bento Grid Architecture -->
   
-  <!-- First Time Operator Guide -->
+  <!-- First Time User Guide -->
   <section id="guide" style="background: rgba(12, 15, 23, 0.4);">
     <div class="container">
       <span class="sec_badge">Quickstart Guide</span>
-      <h2 class="sec_heading">First time operator guide.</h2>
+      <h2 class="sec_heading">First time user guide.</h2>
       <p class="sec_caption">
-        Three simple paths to evaluate, test, and integrate DeskFlow in under sixty seconds.
+        Three simple paths to evaluate, test, and trade safely with DeskFlow in under sixty seconds.
       </p>
 
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-        <!-- Path 1: Instant Browser Test -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        <!-- Path 1: Instant Browser Assistant -->
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
-          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path One · Zero Install</div>
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path One · Web Assistant</div>
           <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Test in Your Browser</h3>
           <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
-            Jump straight into the live terminal below. Type any natural language prompt or click a preset chip to watch DeskFlow enforce caps, pull live Binance order book depth, and request explicit authorization.
+            Jump straight into the live interactive chat below. Type any natural language prompt or click a preset chip to watch DeskFlow enforce caps, pull live Binance order book depth, and request explicit authorization.
           </p>
-          <a href="#console" class="btn_secondary" style="text-align: center; width: 100%;">Jump to Live Terminal</a>
+          <a href="#console" class="btn_secondary" style="text-align: center; width: 100%;">Jump to Live Assistant</a>
         </div>
 
-        <!-- Path 2: Standalone Local CLI -->
+        <!-- Path 2: AI Agent Integration -->
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
-          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Two · Local Machine</div>
-          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Run Local Python Clerk</h3>
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Two · AI Assistant Chat</div>
+          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Chat via Claude or Cursor</h3>
           <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
-            Run DeskFlow locally with zero external libraries. Run the automated test suite to verify mandate intercepts and receipt rendering, or execute a custom order prompt directly in your shell.
+            Connect DeskFlow globally to Claude Code or Cursor. Talk naturally to your AI assistant to evaluate trades, review live prices, and approve orders with your explicit confirmation token.
           </p>
-          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft);">
-            cd DeskFlow && python deskflow.py test
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft); line-height: 1.5;">
+            <code>pip install git+https://github.com/Datwebguy/DeskFlow.git<br>
+            claude mcp add --scope user deskflow -- deskflow mcp</code>
           </div>
         </div>
 
-        <!-- Path 3: Agent OS & Claude Code -->
+        <!-- Path 3: Direct Terminal Command -->
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; position: relative; display: flex; flex-direction: column;">
-          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Three · AI Agent Integration</div>
-          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Attach Model Context Protocol</h3>
+          <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Path Three · Terminal Command</div>
+          <h3 style="font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 10px;">Direct Protected Order</h3>
           <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1;">
-            Attach DeskFlow to Claude Code, Cursor, or your Agent OS environment. Connect the clerk tool provider so your autonomous agent cannot execute orders without your explicit confirmation.
+            Dispatch natural language orders from any command prompt. DeskFlow validates your spending limits, fetches real time Binance liquidity, and waits for your confirmation before placing the trade.
           </p>
-          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--text-soft);">
-            claude mcp add deskflow -- python deskflow.py mcp
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--text-soft);">
+            <code>deskflow "Buy 5 USD BNB. Cash only."</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversational Walkthrough Banner -->
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px;">
+        <div style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">How You Trade with Your AI Assistant</div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--gold); margin-bottom: 6px;">STEP 1</div>
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: var(--text);">Natural Request</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">You prompt: <span style="color: var(--text);">"Buy 5 USD BNB. Cash only."</span> DeskFlow intercepts before exchange routing.</div>
+          </div>
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--gold); margin-bottom: 6px;">STEP 2</div>
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: var(--text);">Live Quote &amp; Check</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">DeskFlow checks spending limit, pulls live Binance depth, compares Spot vs Convert, and issues ticket PO_001.</div>
+          </div>
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--gold); margin-bottom: 6px;">STEP 3</div>
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: var(--text);">Explicit Approval</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">You reply: <span style="color: var(--green); font-weight: 600;">CONFIRM PO_001</span>. Casual phrases like "yes" or "ok" are strictly rejected.</div>
+          </div>
+          <div style="background: #05070a; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--gold); margin-bottom: 6px;">STEP 4</div>
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: var(--text);">Settled Receipt</div>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">DeskFlow executes fill, isolates fee, computes basis points shortfall, and records to immutable blotter.</div>
           </div>
         </div>
       </div>
@@ -751,13 +779,16 @@
         </div>
 
         <div class="tab_pane active">
-          <pre><span style="color: var(--text-muted);"># Step 1: Connect official Binance Agent OS gateway</span>
-claude mcp add binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
+          <pre><span style="color: var(--text-muted);"># Step 1: Install DeskFlow globally via pip</span>
+pip install git+https://github.com/Datwebguy/DeskFlow.git
 
-<span style="color: var(--text-muted);"># Step 2: Attach DeskFlow execution clerk</span>
-claude mcp add deskflow -- python deskflow.py mcp
+<span style="color: var(--text-muted);"># Step 2: Connect official Binance Agent OS gateway</span>
+claude mcp add --scope user binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
 
-<span style="color: var(--text-muted);"># Step 3: Dispatch natural language orders</span>
+<span style="color: var(--text-muted);"># Step 3: Attach DeskFlow execution clerk globally</span>
+claude mcp add --scope user deskflow -- deskflow mcp
+
+<span style="color: var(--text-muted);"># Step 4: Chat naturally with your assistant</span>
 Operator: "Buy 5 USD BNB. Cash only."
 DeskFlow: Emits PO_001 ticket with decision mid and touch ask.
 Operator: "CONFIRM PO_001"
@@ -765,12 +796,11 @@ DeskFlow: Commits execution, isolates fee, and returns glowing receipt card.</pr
         </div>
 
         <div class="tab_pane">
-          <pre><span style="color: var(--text-muted);"># Step 1: Clone and navigate to DeskFlow directory</span>
-git clone https://github.com/Datwebguy/DeskFlow.git
-cd DeskFlow
+          <pre><span style="color: var(--text-muted);"># Step 1: Install DeskFlow globally</span>
+pip install git+https://github.com/Datwebguy/DeskFlow.git
 
-<span style="color: var(--text-muted);"># Step 2: Execute dynamic order prompt</span>
-python deskflow.py "Buy 3 USD SOLANA. Cash only."
+<span style="color: var(--text-muted);"># Step 2: Execute dynamic order prompt from any folder</span>
+deskflow "Buy 3 USD SOLANA. Cash only."
 
 <span style="color: var(--text-muted);"># Clerk evaluates live Binance bookTicker and asks for authorization</span>
 [MANDATE CHECK PASSED]
@@ -784,8 +814,8 @@ AWAITING APPROVAL: Type 'CONFIRM PO_001' to commit.</pre>
         </div>
 
         <div class="tab_pane">
-          <pre><span style="color: var(--text-muted);"># Run complete zero dependency verification suite</span>
-python deskflow.py test
+          <pre><span style="color: var(--text-muted);"># Run complete zero dependency verification suite from any folder</span>
+deskflow test
 
 <span style="color: var(--text-muted);"># Output verifies leverage rejection, size limit, live quotes, and receipt rendering</span>
 ==================================================================
