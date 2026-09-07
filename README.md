@@ -12,7 +12,7 @@ Live Interactive Terminal: https://datwebguy.github.io/DeskFlow/
 
 When trading cryptocurrency with autonomous artificial intelligence assistants such as Claude, Cursor, ChatGPT, or Binance Agent OS, language models can easily make critical mistakes. An artificial intelligence agent might misread pricing, hallucinate order parameters, repeat duplicate fills, borrow unauthorized margin, or exhaust your balance on an uncontrolled prompt.
 
-DeskFlow is your personal financial safety guard. It acts as an execution clerk positioned between your conversational agent and the Binance exchange. DeskFlow strictly enforces your spending ceiling, inspects live order book depth from Binance, routes across Spot and Convert for optimal liquidity, and requires your explicit manual approval (`CONFIRM PO_001`) before any order can ever be dispatched.
+DeskFlow is your personal financial safety guard. It acts as an execution clerk positioned between your conversational agent and the Binance exchange. DeskFlow strictly enforces your spending ceiling, inspects live order book depth from Binance, routes across Spot and Convert for optimal liquidity, and requires your explicit manual approval (`CONFIRM PO-001`) before any order can ever be dispatched.
 
 > [!NOTE]
 > DeskFlow operates directly alongside the official Binance Agent OS endpoint. It interacts solely with the dedicated agentic subaccount, guaranteeing that master account balances, external withdrawal functions, and unapproved financial instruments remain completely inaccessible.
@@ -22,16 +22,16 @@ DeskFlow is your personal financial safety guard. It acts as an execution clerk 
 DeskFlow is designed for natural conversation. You chat with your artificial intelligence assistant just like speaking to an execution clerk on a trading desk:
 
 1. **You make a natural request**: You prompt your agent naturally: `"Buy 5 USD BNB. Cash only."`
-2. **DeskFlow quotes and verifies**: DeskFlow intercepts the command, checks your spending limits, fetches live Binance order book depth, compares Spot against Convert liquidity, and creates ticket `PO_001`.
-3. **Your agent requests approval**: Your assistant reports live pricing and asks for confirmation: `"DeskFlow quoted BNB at 765.55 USDT on Spot. Spending: $5.00 USD. Reply CONFIRM PO_001 to execute."`
-4. **You provide exact confirmation**: You reply: `"CONFIRM PO_001"`
+2. **DeskFlow quotes and verifies**: DeskFlow intercepts the command, checks your spending limits, fetches live Binance order book depth, compares Spot against Convert liquidity, and creates ticket `PO-001`.
+3. **Your agent requests approval**: Your assistant reports live pricing and asks for confirmation: `"DeskFlow quoted BNB at 765.55 USDT on Spot. Spending: $5.00 USD. Reply CONFIRM PO-001 to execute."`
+4. **You provide exact confirmation**: You reply: `"CONFIRM PO-001"`
 5. **DeskFlow executes and audits**: DeskFlow dispatches the fill to Binance, isolates fees, calculates slippage in basis points, logs the fill to an immutable blotter, and returns a verified execution receipt card.
 
 > [!IMPORTANT]
-> DeskFlow rejects conversational approvals. If you reply with `"Yes"`, `"Go ahead"`, or `"Looks good"`, DeskFlow refuses execution. Only the exact approval token `CONFIRM PO_001` unlocks order placement. Your capital is never risked on an ambiguous chat message.
+> DeskFlow rejects conversational approvals. If you reply with `"Yes"`, `"Go ahead"`, or `"Looks good"`, DeskFlow refuses execution. Only the exact approval token `CONFIRM PO-001` unlocks order placement. Your capital is never risked on an ambiguous chat message.
 
 ```diff
-+ AUTHORIZED COMMAND: CONFIRM PO_001
++ AUTHORIZED COMMAND: CONFIRM PO-001
 ! RESULT: Dispatches execution to selected venue
 ! REJECTED INPUT: Yes go ahead, Execute now, Looks good
 ! OUTCOME: Zero exchange orders dispatched
@@ -48,7 +48,7 @@ The fastest way to experience DeskFlow without installing software:
 1. Open the live web portal at https://datwebguy.github.io/DeskFlow/
 2. Click any preset chip or type your own custom prompt such as `"Buy 5 USD BNB. Cash only."` or `"Buy 3 USD SOLANA. Cash only."`
 3. Watch DeskFlow check your spending mandate, stream live Binance order book depth, and request confirmation.
-4. Click **Confirm Order** to simulate execution and inspect the resulting audited receipt card.
+4. Use the page as a product walkthrough. Live pricing and execution require the Claude/Cursor MCP setup below.
 
 ### Path Two · AI Assistant Chat (Claude Code and Cursor)
 
@@ -76,11 +76,11 @@ claude mcp add --scope user deskflow -- deskflow mcp
 claude
 ```
 
-Prompt your assistant: `"Buy 5 USD BNB. Cash only."` DeskFlow intercepts the request, presents ticket `PO_001`, and awaits your reply: `"CONFIRM PO_001"`.
+Prompt your assistant: `"Buy 5 USD BNB. Cash only."` DeskFlow intercepts the request, presents ticket `PO-001`, and awaits your reply: `"CONFIRM PO-001"`.
 
-### Path Three · Direct Terminal Command
+### Path Three · Verification Suite
 
-If you prefer using the command prompt directly without an artificial intelligence chatbot:
+Use the command prompt to verify DeskFlow’s mandate and reconciliation logic without placing an exchange order:
 
 1. Install DeskFlow globally:
 
@@ -88,16 +88,17 @@ If you prefer using the command prompt directly without an artificial intelligen
 pip install git+https://github.com/Datwebguy/DeskFlow.git
 ```
 
-2. Run protected natural language orders directly from any directory:
-
-```bash
-deskflow "Buy 5 USD BNB. Cash only."
-```
-
-3. Run the automated verification suite to verify all mandate protections and receipt rendering in one second:
+2. Run the local verification suite:
 
 ```bash
 deskflow test
+```
+
+The live execution workflow requires Claude or Cursor connected to both the DeskFlow stdio MCP server and the official Binance Agent OS MCP.
+
+```bash
+claude mcp add --scope user binance-mcp-server --transport http https://agent.binance.com/mcp/agentic
+claude mcp add --scope user deskflow -- deskflow mcp
 ```
 
 ## How You Control Your Spending Ceiling
@@ -138,7 +139,7 @@ Upon fill confirmation, DeskFlow prints an institutional trade execution card gi
 ┌──────────────────────────────────────────────────────────────────┐
 │  DESKFLOW EXECUTION RECEIPT · BINANCE AGENT OS                   │
 ├──────────────────────────────────────────────────────────────────┤
-│  Parent Order ID : PO_001                Status   : FILLED        │
+│  Parent Order ID : PO-001                Status   : FILLED        │
 │  Venue Executed  : SPOT                  Symbol   : BNBUSDT       │
 │  Planned Capital : $5.00 USD             Filled   : 0.00653130 BNB│
 ├──────────────────────────────────────────────────────────────────┤
@@ -157,8 +158,8 @@ DeskFlow exposes five standardized tools over standard input and output, allowin
 
 | Tool Name | Input Arguments | Operation and Output |
 |---|---|---|
-| `deskflow_price_order` | `{"order_text": string, "max_notional_usd"?: number}` | Parses dynamic prompt, validates mandate, queries live Binance liquidity, emits pretrade ticket |
-| `deskflow_confirm_execution` | `{"po_id": string, "confirm_token": string}` | Verifies authorization token, executes order on selected venue, computes shortfall, appends blotter |
+| `deskflow_price_order` | `{"order_text": string, "market_data": object, "max_notional_usd"?: number}` | Parses the prompt, validates the mandate, evaluates Agent OS Spot/Convert data, and emits a pretrade ticket |
+| `deskflow_confirm_execution` | `{"po_id": string, "confirm_token": string, "execution_result": object}` | Verifies authorization and reconciles the selected Binance Agent OS execution result into the blotter |
 | `deskflow_update_mandate` | `{"max_notional_usd": number}` | Adjusts the active session capital ceiling (for example raising cap from ten to fifty dollars) |
 | `deskflow_inspect_blotter` | `{}` | Returns complete markdown blotter audit trail with historical execution shortfall metrics |
 | `deskflow_verify_mandate` | `{}` | Returns active governing constraints including size caps, permitted venues, and confirmation mandates |
