@@ -78,6 +78,25 @@ claude
 
 Prompt your assistant: `"Buy 5 USD BNB. Cash only."` DeskFlow intercepts the request, presents ticket `PO-001`, and awaits your reply: `"CONFIRM PO-001"`.
 
+### Short MCP Usage Guide
+
+After both MCP servers are connected, start Claude Code:
+
+```bash
+claude
+```
+
+Then use the workflow:
+
+```text
+You: Buy 5 USD BNB. Cash only.
+DeskFlow: Returns a Spot-versus-Convert ticket for PO-001.
+You: CONFIRM PO-001
+DeskFlow: Reconciles the Agent OS execution result and writes the blotter receipt.
+```
+
+DeskFlow requires Agent OS market data for pricing and an Agent OS execution result for confirmation. Missing or incomplete data is rejected; the clerk never invents a quote or fill.
+
 ### Path Three · Verification Suite
 
 Use the command prompt to verify DeskFlow’s mandate and reconciliation logic without placing an exchange order:
